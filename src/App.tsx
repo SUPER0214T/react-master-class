@@ -1,4 +1,7 @@
+import React from "react";
+import { useRecoilState, useRecoilValue } from "recoil";
 import { createGlobalStyle } from "styled-components";
+import { hourSelector, minuteState } from "./atoms";
 
 export const GlobalStyle = createGlobalStyle`
   @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400&display=swap');
@@ -64,10 +67,22 @@ export const GlobalStyle = createGlobalStyle`
 `;
 
 function App() {
+  const [minutes, setMinutes] = useRecoilState(minuteState);
+  // const hValue = useRecoilValue(hourSelector);  // hValue랑 hours랑 같다고 생각하면 될 듯
+  const [hours, setHours] = useRecoilState(hourSelector);
+  const onMinutesChange = (e: React.FormEvent<HTMLInputElement>) => {
+    setMinutes(parseInt(e.currentTarget.value));
+  }
+
+  const onHoursChange = (e: React.FormEvent<HTMLInputElement>) => {
+    setHours(parseInt(e.currentTarget.value));
+  }
 
   return (
     <>
       <GlobalStyle />
+      <input value={minutes} onChange={onMinutesChange} type="number" placeholder="Minutes" />
+      <input value={hours} onChange={onHoursChange} type="number" placeholder="Hours" />
     </>
   );
 }
