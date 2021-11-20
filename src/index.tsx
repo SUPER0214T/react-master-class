@@ -59,7 +59,6 @@ export const GlobalStyle = createGlobalStyle`
   }
   body {
     font-family: 'Noto Sans KR', sans-serif;
-    background: linear-gradient(135deg,#e09,#d0e);
     color: black;
   }
   a {

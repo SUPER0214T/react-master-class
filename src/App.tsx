@@ -1,13 +1,14 @@
-import { motion, Variants } from 'framer-motion';
-import React, { useRef } from 'react';
+import { motion, useMotionValue, useTransform, Variants } from 'framer-motion';
+import React, { useEffect, useRef } from 'react';
 import styled from 'styled-components';
 
-const Wrapper = styled.div`
+const Wrapper = styled(motion.div)`
 	display: flex;
 	justify-content: center;
 	align-items: center;
 	width: 100vw;
 	height: 100vh;
+	background: linear-gradient(135deg, rgb(238, 0, 153), rgb(221, 0, 238));
 `;
 
 const Box = styled(motion.div)`
@@ -18,40 +19,22 @@ const Box = styled(motion.div)`
 	box-shadow: 0 2px 3px rgba(0, 0, 0, 0.1), 0 10px 20px rgba(0, 0, 0, 0.06);
 `;
 
-const BiggerBox = styled(motion.div)`
-	display: flex;
-	justify-content: center;
-	align-items: center;
-	overflow: hidden;
-	width: 600px;
-	height: 600px;
-	background-color: rgba(255, 255, 255, 0.2);
-	border-radius: 40px;
-	box-shadow: 0 2px 3px rgba(0, 0, 0, 0.1), 0 10px 20px rgba(0, 0, 0, 0.06);
-`;
-
-const boxVariants: Variants = {
-	hover: { scale: 1.5, rotateZ: 90 },
-	click: { scale: 0.8, borderRadius: '50%' },
-};
-
 function App() {
-	const biggerBoxRef = useRef(null);
+	const x = useMotionValue(0);
+	const rotateZ = useTransform(x, [-800, 800], [-360, 360]);
+	const gradient = useTransform(
+		x,
+		[-800, 0, 800],
+		[
+			'linear-gradient(135deg, rgb(137, 240, 40), rgb(70, 81, 238))',
+			'linear-gradient(135deg, rgb(238, 0, 153), rgb(221, 0, 238))',
+			'linear-gradient(135deg, rgb(235, 212, 10), rgb(240, 101, 21))',
+		]
+	);
 
 	return (
-		<Wrapper>
-			<BiggerBox ref={biggerBoxRef}>
-				<Box
-					drag
-					dragConstraints={biggerBoxRef}
-					dragElastic={1}
-					dragSnapToOrigin
-					variants={boxVariants}
-					whileHover="hover"
-					whileTap="click"
-					whileDrag={{ backgroundColor: 'rgb(200, 200, 200)' }}
-				/>
-			</BiggerBox>
+		<Wrapper style={{ background: gradient }}>
+			<Box style={{ x, rotateZ }} drag dragSnapToOrigin />
 		</Wrapper>
 	);
 }
