@@ -69,13 +69,13 @@ export const GlobalStyle = createGlobalStyle`
 `;
 
 ReactDOM.render(
-  <React.StrictMode>
-    <RecoilRoot>
-      <ThemeProvider theme={darkTheme}>
-        <GlobalStyle />
-        <App />
-      </ThemeProvider>
-    </RecoilRoot>
-  </React.StrictMode>,
-  document.getElementById('root')
+	<React.StrictMode>
+		<RecoilRoot>
+			<ThemeProvider theme={darkTheme}>
+				<GlobalStyle />
+				<App />
+			</ThemeProvider>
+		</RecoilRoot>
+	</React.StrictMode>,
+	document.getElementById('root')
 );
