@@ -1,26 +1,26 @@
-import { motion, Variants } from 'framer-motion';
-import React, { useState } from 'react';
+import {
+	motion,
+	useAnimation,
+	useViewportScroll,
+	Variants,
+} from 'framer-motion';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useRouteMatch } from 'react-router';
 import styled from 'styled-components';
 
-const Nav = styled.div`
+const Nav = styled(motion.div)`
 	display: flex;
 	justify-content: space-between;
 	align-items: center;
 	position: fixed;
 	top: 0;
 	width: 100%;
-	background-color: black;
+	background-color: transparent;
 	height: 80px;
 	font-size: 14px;
 	padding: 20px 60px;
 	color: white;
-	/* background: linear-gradient(
-		to bottom,
-		rgb(0 0 0 / 70%) 10%,
-		rgba(0, 0, 0, 0)
-	); */
 `;
 
 const Col = styled.div`
@@ -68,6 +68,7 @@ const Search = styled.span`
 		height: 25px;
 		z-index: 1;
 		padding-left: 5px;
+		cursor: pointer;
 	}
 `;
 
@@ -101,11 +102,24 @@ const logoVariants: Variants = {
 		fillOpacity: 1,
 	},
 	active: {
-		fillOpacity: [0, 1, 0],
+		fillOpacity: [1, 0, 1],
 		transition: {
 			repeat: Infinity,
-			duration: 3,
+			duration: 4,
 		},
+	},
+};
+
+const navVariants: Variants = {
+	top: {
+		background: 'rgba(20, 20, 20, .1)',
+		backgroundImage:
+			'linear-gradient(to bottom,rgba(0,0,0,.7) 10%,rgba(0,0,0,0))',
+	},
+	scroll: {
+		background: 'rgba(20, 20, 20, 1)',
+		backgroundImage:
+			'linear-gradient(to bottom,rgba(0,0,0,.7) 10%,rgba(0,0,0,0))',
 	},
 };
 
@@ -114,9 +128,27 @@ function Header() {
 	const homeMatch = useRouteMatch('/');
 	const tvMatch = useRouteMatch('/tv');
 	const toggleSearch = () => setIsSearchOpen((prev) => !prev);
+	const inputAnimation = useAnimation();
+	const { scrollY } = useViewportScroll();
+
+	useEffect(() => {
+		scrollY.onChange(() => {
+			console.log(scrollY.get());
+			if (scrollY.get() <= 5) {
+				inputAnimation.start('top');
+			} else {
+				inputAnimation.start('scroll');
+			}
+		});
+	}, [scrollY]);
 
 	return (
-		<Nav>
+		<Nav
+			transition={{ duration: 0.35 }}
+			variants={navVariants}
+			animate={inputAnimation}
+			initial="top"
+		>
 			<Col>
 				<Logo
 					variants={logoVariants}
@@ -160,6 +192,7 @@ function Header() {
 					</motion.svg>
 					<Input
 						transition={{ type: 'linear' }}
+						initial={{ scaleX: 0 }}
 						animate={{ scaleX: isSearchOpen ? 1 : 0 }}
 						placeholder="Search for movie or tv show."
 					/>
