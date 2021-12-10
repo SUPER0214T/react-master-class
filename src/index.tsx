@@ -60,7 +60,8 @@ export const GlobalStyle = createGlobalStyle`
   }
   body {
     font-family: 'Noto Sans KR', sans-serif;
-    color: black;
+    color: ${(props) => props.theme.white.darker};
+    background-color: black;
   }
   a {
     text-decoration: none;
