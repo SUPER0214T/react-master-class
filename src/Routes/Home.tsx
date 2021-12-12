@@ -8,6 +8,7 @@ import { makeImagePath } from '../utils';
 const Wrapper = styled.div`
 	background: black;
 	height: 200vh;
+	overflow: hidden;
 `;
 
 const Loader = styled.div`
@@ -40,15 +41,13 @@ const Overview = styled.p`
 
 const Slider = styled.div`
 	position: relative;
-	width: 100%;
-	height: 100%;
 `;
 
 const Row = styled(motion.div)`
 	display: grid;
 	grid-template-columns: repeat(6, 1fr);
-	gap: 10px;
-	margin-bottom: 10px;
+	gap: 5px;
+	margin-bottom: 5px;
 	position: absolute;
 	top: -100px;
 	width: 100%;
@@ -57,22 +56,27 @@ const Row = styled(motion.div)`
 	z-index: 10;
 `;
 
-const Box = styled(motion.div)`
+const Box = styled(motion.div)<{ bgPhoto: string }>`
 	background-color: #fff;
 	height: 200px;
+	background-image: url(${(props) => props.bgPhoto});
+	background-size: cover;
+	background-position: center center;
 `;
 
 const rowVariants: Variants = {
 	initial: {
-		x: window.outerWidth + 10,
+		x: window.outerWidth + 5,
 	},
 	animate: {
 		x: 0,
 	},
 	exit: {
-		x: -window.outerWidth - 10,
+		x: -window.outerWidth - 5,
 	},
 };
+
+const offset = 6; // Slider 한 페이지에 나오는 영화의 수
 
 function Home() {
 	const { data, isLoading } = useQuery<IGetMovieResult>(
@@ -81,7 +85,20 @@ function Home() {
 	);
 
 	const [index, setIndex] = useState(0);
-	const increaseIndex = () => setIndex((prev) => prev + 1);
+	const [leaving, setLeaving] = useState(false);
+	const increaseIndex = () => {
+		if (data) {
+			if (leaving) return;
+			setLeaving(true);
+			const totalMovies = data.results.length - 1;
+			const maxIndex = Math.floor(totalMovies / offset) - 1;
+			setIndex((prev) => (prev === maxIndex ? 0 : prev + 1));
+		}
+	};
+
+	const toggleLeaving = () => {
+		setLeaving(false);
+	};
 
 	return (
 		<Wrapper>
@@ -97,7 +114,7 @@ function Home() {
 						<Overview>{data?.results[0].overview}</Overview>
 					</Banner>
 					<Slider>
-						<AnimatePresence>
+						<AnimatePresence initial={false} onExitComplete={toggleLeaving}>
 							<Row
 								key={index}
 								variants={rowVariants}
@@ -106,9 +123,15 @@ function Home() {
 								exit="exit"
 								transition={{ type: 'tween', duration: 1 }}
 							>
-								{[1, 2, 3, 4, 5, 6].map((el) => (
-									<Box>{el}</Box>
-								))}
+								{data?.results
+									.slice(1)
+									.slice(offset * index, offset * index + offset)
+									.map((movie) => (
+										<Box
+											key={movie.id}
+											bgPhoto={makeImagePath(movie.backdrop_path, 'w500')}
+										/>
+									))}
 							</Row>
 						</AnimatePresence>
 					</Slider>
