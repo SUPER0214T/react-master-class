@@ -1,6 +1,12 @@
-import { AnimatePresence, motion, Variants } from 'framer-motion';
+import {
+	AnimatePresence,
+	motion,
+	useViewportScroll,
+	Variants,
+} from 'framer-motion';
 import { useState } from 'react';
 import { useQuery } from 'react-query';
+import { useHistory, useRouteMatch } from 'react-router-dom';
 import styled from 'styled-components';
 import { getMovies, IGetMovieResult } from '../api';
 import { makeImagePath } from '../utils';
@@ -85,6 +91,25 @@ const Info = styled(motion.div)`
 	}
 `;
 
+const MovieModal = styled(motion.div)`
+	position: absolute;
+	left: 0;
+	right: 0;
+	margin: 0 auto;
+	width: 40vw;
+	height: 80vh;
+	background-color: red;
+`;
+
+const Overlay = styled(motion.div)`
+	position: fixed;
+	top: 0;
+	width: 100%;
+	height: 100%;
+	background-color: rgba(0, 0, 0, 0.7);
+	opacity: 0;
+`;
+
 const rowVariants: Variants = {
 	initial: {
 		x: window.outerWidth + 5,
@@ -129,10 +154,13 @@ const infoVariants: Variants = {
 const offset = 6; // Slider 한 페이지에 나오는 영화의 수
 
 function Home() {
+	const history = useHistory();
+	const bigMovieMatch = useRouteMatch<{ movieId: string }>('/movies/:movieId');
 	const { data, isLoading } = useQuery<IGetMovieResult>(
 		['movie', 'nowPlaying'],
 		getMovies
 	);
+	const { scrollY } = useViewportScroll();
 
 	const [index, setIndex] = useState(0);
 	const [leaving, setLeaving] = useState(false);
@@ -148,6 +176,14 @@ function Home() {
 
 	const toggleLeaving = () => {
 		setLeaving(false);
+	};
+
+	const onBoxClicked = (movieId: number) => {
+		history.push(`/movies/${movieId}`);
+	};
+
+	const onOverlayClick = () => {
+		history.push(`/`);
 	};
 
 	return (
@@ -178,6 +214,8 @@ function Home() {
 									.slice(offset * index, offset * index + offset)
 									.map((movie) => (
 										<Box
+											layoutId={movie.id + ''}
+											onClick={() => onBoxClicked(movie.id)}
 											variants={boxVariants}
 											initial="normal"
 											whileHover="hover"
@@ -194,6 +232,21 @@ function Home() {
 							</Row>
 						</AnimatePresence>
 					</Slider>
+					<AnimatePresence>
+						{bigMovieMatch ? (
+							<>
+								<Overlay
+									onClick={onOverlayClick}
+									animate={{ opacity: 1 }}
+									exit={{ opacity: 0 }}
+								/>
+								<MovieModal
+									style={{ top: scrollY.get() + 100 }}
+									layoutId={bigMovieMatch.params.movieId}
+								/>
+							</>
+						) : null}
+					</AnimatePresence>
 				</>
 			)}
 		</Wrapper>

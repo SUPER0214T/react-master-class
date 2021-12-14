@@ -10,7 +10,7 @@ function App() {
 		<BrowserRouter>
 			<Header />
 			<Switch>
-				<Route exact path="/">
+				<Route exact path={['/', '/movies/:movieId']}>
 					<Home />
 				</Route>
 				<Route path="/tv">
