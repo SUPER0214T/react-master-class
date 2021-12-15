@@ -5,9 +5,11 @@ import {
 	Variants,
 } from 'framer-motion';
 import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useHistory } from 'react-router-dom';
 import { useRouteMatch } from 'react-router';
 import styled from 'styled-components';
+import { useForm } from 'react-hook-form';
+import { createImportSpecifier } from 'typescript';
 
 const Nav = styled(motion.div)`
 	display: flex;
@@ -21,6 +23,7 @@ const Nav = styled(motion.div)`
 	font-size: 14px;
 	padding: 20px 60px;
 	color: white;
+	z-index: 100;
 `;
 
 const Col = styled.div`
@@ -58,7 +61,7 @@ const Item = styled.li`
 	}
 `;
 
-const Search = styled.span`
+const Search = styled.form`
 	display: flex;
 	align-items: center;
 	color: white;
@@ -85,9 +88,9 @@ const Circle = styled(motion.span)`
 `;
 
 const Input = styled(motion.input)`
-	background-color: black;
+	background-color: rgba(0, 0, 0, 0.75);
 	outline: none;
-	border: 1px solid white;
+	border: solid 1px rgba(255, 255, 255, 0.85);
 	transform-origin: right center;
 	position: absolute;
 	left: -250px;
@@ -123,24 +126,45 @@ const navVariants: Variants = {
 	},
 };
 
+interface IForm {
+	keyword: string;
+}
+
 function Header() {
 	const [isSearchOpen, setIsSearchOpen] = useState(false);
+	const [isScrollTop, setIsScrollTop] = useState(true);
 	const homeMatch = useRouteMatch('/');
 	const tvMatch = useRouteMatch('/tv');
 	const toggleSearch = () => setIsSearchOpen((prev) => !prev);
 	const inputAnimation = useAnimation();
 	const { scrollY } = useViewportScroll();
+	const history = useHistory();
 
 	useEffect(() => {
 		scrollY.onChange(() => {
 			console.log(scrollY.get());
 			if (scrollY.get() <= 5) {
+				setIsScrollTop(true);
 				inputAnimation.start('top');
 			} else {
+				setIsScrollTop(false);
 				inputAnimation.start('scroll');
 			}
 		});
 	}, [scrollY]);
+
+	const { register, handleSubmit, setValue, watch } = useForm<IForm>();
+	const onValid = (data: IForm) => {
+		console.log(data);
+		history.push(`/search?keyword=${data.keyword}`);
+	};
+
+	useEffect(() => {
+		history.push(`/search?keyword=${watch(`keyword`)}`);
+		if (watch('keyword') === '') {
+			history.push(`/`);
+		}
+	}, [watch(`keyword`)]);
 
 	return (
 		<Nav
@@ -175,7 +199,7 @@ function Header() {
 				</Items>
 			</Col>
 			<Col>
-				<Search>
+				<Search onSubmit={handleSubmit(onValid)}>
 					<motion.svg
 						onClick={toggleSearch}
 						animate={{ x: isSearchOpen ? '-250px' : '0' }}
@@ -191,6 +215,10 @@ function Header() {
 						></path>
 					</motion.svg>
 					<Input
+						{...register('keyword', {
+							required: 'please input word',
+							minLength: 2,
+						})}
 						transition={{ type: 'linear' }}
 						initial={{ scaleX: 0 }}
 						animate={{ scaleX: isSearchOpen ? 1 : 0 }}
