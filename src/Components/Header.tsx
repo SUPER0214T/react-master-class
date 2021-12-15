@@ -4,7 +4,7 @@ import {
 	useViewportScroll,
 	Variants,
 } from 'framer-motion';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Link, useHistory } from 'react-router-dom';
 import { useRouteMatch } from 'react-router';
 import styled from 'styled-components';
@@ -218,6 +218,12 @@ function Header() {
 						{...register('keyword', {
 							required: 'please input word',
 							minLength: 2,
+							onBlur: (e) => {
+								console.log(e);
+								if (e.target.value === '') {
+									setIsSearchOpen(false);
+								}
+							},
 						})}
 						transition={{ type: 'linear' }}
 						initial={{ scaleX: 0 }}
