@@ -96,9 +96,35 @@ const MovieModal = styled(motion.div)`
 	left: 0;
 	right: 0;
 	margin: 0 auto;
-	width: 40vw;
+	width: 850px;
 	height: 80vh;
-	background-color: red;
+	background-color: ${(props) => props.theme.black.lighter};
+	z-index: 300;
+	border-radius: 15px;
+	overflow: hidden;
+`;
+
+const BigCover = styled.div<{ bgUrl: string }>`
+	width: 100%;
+	height: 480px;
+	background-image: linear-gradient(to top, #181818, transparent 50%),
+		url(${(props) => props.bgUrl});
+	background-size: cover;
+	background-repeat: no-repeat;
+	background-position: center center;
+`;
+
+const BigTitle = styled.h3`
+	color: ${(props) => props.theme.white.lighter};
+	font-size: 36px;
+	position: relative;
+	top: -80px;
+`;
+
+const BigOverview = styled.p`
+	color: ${(props) => props.theme.white.lighter};
+	position: relative;
+	top: -70px;
 `;
 
 const Overlay = styled(motion.div)`
@@ -108,6 +134,7 @@ const Overlay = styled(motion.div)`
 	height: 100%;
 	background-color: rgba(0, 0, 0, 0.7);
 	opacity: 0;
+	z-index: 200;
 `;
 
 const rowVariants: Variants = {
@@ -186,6 +213,11 @@ function Home() {
 		history.push(`/`);
 	};
 
+	const clickedMovie =
+		bigMovieMatch?.params.movieId &&
+		data?.results.find((movie) => movie.id === +bigMovieMatch?.params.movieId);
+	console.log(clickedMovie);
+
 	return (
 		<Wrapper>
 			{isLoading ? (
@@ -243,7 +275,20 @@ function Home() {
 								<MovieModal
 									style={{ top: scrollY.get() + 100 }}
 									layoutId={bigMovieMatch.params.movieId}
-								/>
+								>
+									{clickedMovie ? (
+										<>
+											<BigCover
+												bgUrl={makeImagePath(
+													clickedMovie.backdrop_path,
+													'w500'
+												)}
+											/>
+											<BigTitle>{clickedMovie.title}</BigTitle>
+											<BigOverview>{clickedMovie.overview}</BigOverview>
+										</>
+									) : null}
+								</MovieModal>
 							</>
 						) : null}
 					</AnimatePresence>
